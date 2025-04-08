@@ -53,21 +53,18 @@ fun RegistrationScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Logo arriba
         Image(
-            painter = painterResource(id = R.drawable.logo_2), // Usa tu logo aquí
+            painter = painterResource(id = R.drawable.logo_2),
             contentDescription = "Logo BodySync",
-            modifier = Modifier
-                .size(160.dp)
-                .padding(bottom = 16.dp)
+            modifier = Modifier.size(160.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Crea tu cuenta",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
-            )
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -78,7 +75,9 @@ fun RegistrationScreen(
             label = { Text("Nombre completo") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -90,7 +89,9 @@ fun RegistrationScreen(
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -103,7 +104,9 @@ fun RegistrationScreen(
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -116,15 +119,32 @@ fun RegistrationScreen(
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         )
 
         if (contrasena != confirmarContrasena) {
             Text(
-                "Las contraseñas no coinciden",
+                text = "Las contraseñas no coinciden",
                 color = Color.Red,
-                style = MaterialTheme.typography.bodyMedium
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Checkbox(
+                checked = aceptarTerminos,
+                onCheckedChange = { aceptarTerminos = it },
+                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2C5704))
+            )
+            Text("Acepto los Términos y Condiciones")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -149,97 +169,92 @@ fun RegistrationScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(52.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C5704))
         ) {
             Text("Registrarse")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Línea con la "o"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
             Divider(
-                color = Color.Gray,
+                modifier = Modifier.weight(1f),
                 thickness = 1.dp,
-                modifier = Modifier.weight(1f)
+                color = Color.LightGray
             )
             Text(
-                "  o  ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                text = "  o  ",
+                color = Color.Gray,
+                fontSize = 14.sp
             )
             Divider(
-                color = Color.Gray,
+                modifier = Modifier.weight(1f),
                 thickness = 1.dp,
-                modifier = Modifier.weight(1f)
+                color = Color.LightGray
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón ficticio de Google
         OutlinedButton(
-            onClick = { /* luego lo conectamos */ },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
-            Icon(Icons.Default.Email, contentDescription = null)
+            Image(
+                painter = painterResource(id = R.drawable.icon_google),
+                contentDescription = "Google",
+                modifier = Modifier.size(24.dp)
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text("Registrarse con Google")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón ficticio de Apple
         OutlinedButton(
-            onClick = { /* luego lo conectamos */ },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+            Image(
+                painter = painterResource(id = R.drawable.icon_apple),
+                contentDescription = "Apple",
+                modifier = Modifier.size(30.dp)
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text("Registrarse con Apple")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = aceptarTerminos,
-                onCheckedChange = { aceptarTerminos = it }
-            )
+        Row {
+            Text("¿Ya tienes una cuenta? ")
             Text(
-                text = "Acepto los ",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = "Términos y Condiciones",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 12.sp,
-                textDecoration = TextDecoration.Underline
+                text = "Inicia sesión",
+                color = Color(0xFF2C5704),
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable {
+                    onIrALogin()
+                }
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Error de validación
         errorTexto?.let {
             Text(it, color = Color.Red)
-            Spacer(modifier = Modifier.height(8.dp))
         }
-
-        // Ya tienes cuenta
-        Text(
-            text = "¿Ya tienes una cuenta? Inicia sesión",
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 14.sp,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.clickable {
-                onIrALogin()
-            }
-        )
     }
 }

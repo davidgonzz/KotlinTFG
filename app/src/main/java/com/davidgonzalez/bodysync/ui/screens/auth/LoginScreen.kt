@@ -5,15 +5,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +31,8 @@ fun LoginScreen(
     onIrARegistro: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
+    val primaryColor = colorResource(id = R.color.progress_line)
+
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var mantenerSesion by remember { mutableStateOf(true) }
@@ -38,7 +44,6 @@ fun LoginScreen(
         estadoLogin.exceptionOrNull()?.let {
             errorTexto = it.message
         }
-
         if (estadoLogin.isSuccess && estadoLogin.getOrDefault(false)) {
             onLoginExitoso()
         }
@@ -48,68 +53,74 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Logo
         Image(
             painter = painterResource(id = R.drawable.logo_2),
-            contentDescription = "Logo BodySync",
+            contentDescription = "Logo",
             modifier = Modifier
-                .size(100.dp)
-                .padding(bottom = 16.dp)
+                .size(140.dp)
+                .padding(bottom = 8.dp)
         )
 
         Text(
             text = "¡Bienvenido de nuevo!",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold
-            )
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // Email
         OutlinedTextField(
             value = correo,
             onValueChange = { correo = it },
-            label = { Text("Email o nombre de usuario") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            label = { Text("Email") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Email, contentDescription = "Email")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Contraseña
         OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Lock, contentDescription = "Contraseña")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
             Text(
-                "¿Olvidaste tu contraseña?",
+                text = "¿Olvidaste tu contraseña?",
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable {
-                    // Aquí podrías navegar a una pantalla de recuperación de contraseña
-                }
+                color = primaryColor,
+                modifier = Modifier.clickable { }
             )
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -117,13 +128,15 @@ fun LoginScreen(
         ) {
             Checkbox(
                 checked = mantenerSesion,
-                onCheckedChange = { mantenerSesion = it }
+                onCheckedChange = { mantenerSesion = it },
+                colors = CheckboxDefaults.colors(checkedColor = primaryColor)
             )
-            Text("Mantener sesión iniciada")
+            Text(text = "Mantener sesión iniciada")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Botón principal
         Button(
             onClick = {
                 if (correo.isBlank() || contrasena.isBlank()) {
@@ -135,58 +148,91 @@ fun LoginScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(52.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
         ) {
-            Text("Iniciar sesión")
+            Text("Iniciar sesión", fontSize = 16.sp)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Línea separadora con puntito
-        Divider(color = Color.Gray, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(modifier = Modifier.size(8.dp).align(Alignment.CenterHorizontally).padding(4.dp)) {
+        // Línea con la "o" en el centro
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Divider(
+                modifier = Modifier.weight(1f),
+                thickness = 1.dp,
+                color = Color.LightGray
+            )
+            Text(
+                text = "  o  ",
                 color = Color.Gray,
-                modifier = Modifier
-                    .width(8.dp)
-                    .height(2.dp)
+                fontSize = 14.sp
+            )
+            Divider(
+                modifier = Modifier.weight(1f),
+                thickness = 1.dp,
+                color = Color.LightGray
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // Botón Google
         OutlinedButton(
-            onClick = { /* Luego se conecta con Google */ },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { /* TODO: Login con Google */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.Black // letras negras
+            )
         ) {
-            Icon(Icons.Default.Email, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
+            Image(
+                painter = painterResource(id = R.drawable.icon_google),
+                contentDescription = "Google",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
             Text("Continuar con Google")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Botón Apple
         OutlinedButton(
-            onClick = { /* Luego se conecta con Apple */ },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { /* TODO: Login con Apple */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.Black // letras negras
+            )
         ) {
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
+            Image(
+                painter = painterResource(id = R.drawable.icon_apple),
+                contentDescription = "Apple",
+                modifier = Modifier.size(30.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
             Text("Continuar con Apple")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Row {
             Text("¿No tienes cuenta? ")
             Text(
                 text = "Regístrate",
-                color = MaterialTheme.colorScheme.primary,
+                color = primaryColor,
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable {
-                    onIrARegistro()
-                }
+                modifier = Modifier.clickable { onIrARegistro() }
             )
         }
 
