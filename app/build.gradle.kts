@@ -71,7 +71,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // ArchLifecycle
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
     kapt("androidx.lifecycle:lifecycle-compiler:2.2.0")
     //Retrofit2
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -89,12 +89,17 @@ dependencies {
     // LiveData
     implementation(libs.androidx.runtime.livedata)
     // Firebase BoM para manejar versiones automáticamente
-    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
 
     // Dependencias de Firebase
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth:22.1.2")
+    implementation("com.google.firebase:firebase-firestore:24.9.1")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-storage")
+    // Login con Google
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+    // Si usas Compose
+    implementation("androidx.activity:activity-compose:1.7.2")
 }
 

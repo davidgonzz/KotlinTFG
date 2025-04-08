@@ -9,7 +9,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.davidgonzalez.bodysync.navigation.AppNavigation
 import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreenUI
+import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
 import com.davidgonzalez.bodysync.ui.theme.BodySyncTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BodySyncTheme {
-                    SplashScreenUI()
+                AppNavigation()
                 }
 
             }

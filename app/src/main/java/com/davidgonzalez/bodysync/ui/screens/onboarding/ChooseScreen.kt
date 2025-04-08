@@ -1,4 +1,4 @@
-package com.davidgonzalez.bodysync.ui.screens.choose
+package com.davidgonzalez.bodysync.ui.screens.onboarding
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.davidgonzalez.bodysync.ui.theme.BodySyncTheme
