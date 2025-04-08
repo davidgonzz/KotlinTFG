@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id ("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -59,7 +60,9 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.core.splashscreen)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -81,5 +84,17 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
+    // Navigation Compose
+    implementation(libs.androidx.navigation.compose)
+    // LiveData
+    implementation(libs.androidx.runtime.livedata)
+    // Firebase BoM para manejar versiones automáticamente
+    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
 
+    // Dependencias de Firebase
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-storage")
 }
+
