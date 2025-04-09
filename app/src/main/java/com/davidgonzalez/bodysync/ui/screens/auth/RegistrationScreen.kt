@@ -1,5 +1,8 @@
 package com.davidgonzalez.bodysync.ui.screens.auth
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
@@ -18,8 +22,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.davidgonzalez.bodysync.viewmodel.AuthViewModel
 import com.davidgonzalez.bodysync.R
+import com.davidgonzalez.bodysync.viewmodel.AuthViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
 fun RegistrationScreen(
@@ -27,6 +35,9 @@ fun RegistrationScreen(
     onIrALogin: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val estadoRegistro by viewModel.estadoRegistro.collectAsState()
+
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
@@ -34,13 +45,35 @@ fun RegistrationScreen(
     var aceptarTerminos by remember { mutableStateOf(false) }
     var errorTexto by remember { mutableStateOf<String?>(null) }
 
-    val estadoRegistro by viewModel.estadoRegistro.collectAsState()
+    val googleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            viewModel.loginConGoogle(
+                credential = credential,
+                mantenerSesion = true,
+                onSuccess = {
+                    Toast.makeText(context, "Registro con Google exitoso", Toast.LENGTH_SHORT).show()
+                    onRegistroExitoso()
+                },
+                onError = {
+                    if (!it.contains("12501")) {
+                        Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        } catch (e: ApiException) {
+            if (e.statusCode != 12501) {
+                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     LaunchedEffect(estadoRegistro) {
         estadoRegistro.exceptionOrNull()?.let {
             errorTexto = it.message
         }
-
         if (estadoRegistro.isSuccess && estadoRegistro.getOrDefault(false)) {
             onRegistroExitoso()
         }
@@ -61,12 +94,7 @@ fun RegistrationScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Crea tu cuenta",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
-        )
-
+        Text("Crea tu cuenta", fontSize = 30.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -74,10 +102,8 @@ fun RegistrationScreen(
             onValueChange = { nombre = it },
             label = { Text("Nombre completo") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -88,10 +114,8 @@ fun RegistrationScreen(
             label = { Text("Correo electrónico") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -101,12 +125,10 @@ fun RegistrationScreen(
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -116,47 +138,32 @@ fun RegistrationScreen(
             onValueChange = { confirmarContrasena = it },
             label = { Text("Confirmar contraseña") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            singleLine = true
         )
 
         if (contrasena != confirmarContrasena) {
-            Text(
-                text = "Las contraseñas no coinciden",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            Text("Las contraseñas no coinciden", color = Color.Red, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Checkbox(
                 checked = aceptarTerminos,
                 onCheckedChange = { aceptarTerminos = it },
                 colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2C5704))
             )
             Row {
-                Text(
-                    text = "Acepto los ",
-                    fontSize = 12.sp
-                )
+                Text("Acepto los ", fontSize = 12.sp)
                 Text(
                     text = "Términos y Condiciones",
                     fontSize = 12.sp,
                     color = Color(0xFF2C5704),
                     textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable {
-                        // Aquí puedes abrir un diálogo o web con los términos
-                    }
+                    modifier = Modifier.clickable { }
                 )
             }
         }
@@ -173,17 +180,10 @@ fun RegistrationScreen(
                     errorTexto = "Debes aceptar los Términos."
                 } else {
                     errorTexto = null
-                    viewModel.registrarUsuario(
-                        nombre,
-                        correo,
-                        contrasena,
-                        aceptarTerminos
-                    )
+                    viewModel.registrarUsuario(nombre, correo, contrasena, aceptarTerminos)
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = MaterialTheme.shapes.extraLarge,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C5704))
         ) {
@@ -192,34 +192,26 @@ fun RegistrationScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Divider(
-                modifier = Modifier.weight(1f),
-                thickness = 1.dp,
-                color = Color.LightGray
-            )
-            Text(
-                text = "  o  ",
-                color = Color.Gray,
-                fontSize = 14.sp
-            )
-            Divider(
-                modifier = Modifier.weight(1f),
-                thickness = 1.dp,
-                color = Color.LightGray
-            )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Divider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color.LightGray)
+            Text("  o  ", color = Color.Gray, fontSize = 14.sp)
+            Divider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color.LightGray)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedButton(
-            onClick = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            onClick = {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(context.getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()
+                val googleClient = GoogleSignIn.getClient(context, gso)
+                val intent = googleClient.signInIntent
+                intent.putExtra("lang", "es")
+                googleLauncher.launch(intent)
+            },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = MaterialTheme.shapes.extraLarge,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
@@ -236,9 +228,7 @@ fun RegistrationScreen(
 
         OutlinedButton(
             onClick = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = MaterialTheme.shapes.extraLarge,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
         ) {
@@ -259,9 +249,7 @@ fun RegistrationScreen(
                 text = "Inicia sesión",
                 color = Color(0xFF2C5704),
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable {
-                    onIrALogin()
-                }
+                modifier = Modifier.clickable { onIrALogin() }
             )
         }
 

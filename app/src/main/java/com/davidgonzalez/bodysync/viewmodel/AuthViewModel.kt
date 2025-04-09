@@ -3,6 +3,7 @@ package com.davidgonzalez.bodysync.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.davidgonzalez.bodysync.ui.model.Usuario
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,5 +84,45 @@ class AuthViewModel : ViewModel() {
                 println("❌ Error al iniciar sesión: ${e.message}")
                 _estadoLogin.value = Result.failure(e)
             }
+    }
+
+    // Recuperación de contraseña
+    fun enviarCorreoRecuperacion(
+        email: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        auth.sendPasswordResetEmail(email)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e.message ?: "Error desconocido") }
+    }
+    //Login con Google
+    fun loginConGoogle(
+        credential: AuthCredential,
+        mantenerSesion: Boolean,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        auth.signInWithCredential(credential)
+            .addOnSuccessListener { result ->
+                val uid = result.user?.uid ?: return@addOnSuccessListener
+                firestore.collection("usuarios").document(uid).get()
+                    .addOnSuccessListener { document ->
+                        if (!document.exists()) {
+                            val usuario = Usuario(
+                                nombreCompleto = result.user?.displayName ?: "",
+                                correo = result.user?.email ?: "",
+                                fechaRegistro = Date().toInstant().toString(),
+                                terminosAceptados = true,
+                                proveedor = "google"
+                            )
+                            firestore.collection("usuarios").document(uid)
+                                .set(usuario)
+                        }
+                        onSuccess()
+                    }
+                    .addOnFailureListener { onError("Firestore error: ${it.message}") }
+            }
+            .addOnFailureListener { e -> onError(e.message ?: "Error desconocido") }
     }
 }
