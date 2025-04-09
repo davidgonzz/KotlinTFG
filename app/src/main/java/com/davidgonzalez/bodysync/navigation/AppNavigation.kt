@@ -7,15 +7,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
-import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
+import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
 
 @Composable
 fun AppNavigation() {
-    val navController: NavHostController = rememberNavController()
+    val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "splash") {
-        // SplashScreen decide hacia dónde ir
+    NavHost(
+        navController = navController,
+        startDestination = "splash"
+    ) {
         composable("splash") {
             SplashScreen(navController)
         }
@@ -32,6 +34,7 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable("registro") {
             RegistrationScreen(
                 onRegistroExitoso = {
@@ -44,7 +47,7 @@ fun AppNavigation() {
                 }
             )
         }
-        // Pantalla principal post-login
+
         composable("choose") {
             ChooseScreenUI()
         }

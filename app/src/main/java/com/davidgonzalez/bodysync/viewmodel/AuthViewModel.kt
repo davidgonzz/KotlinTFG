@@ -42,17 +42,28 @@ class AuthViewModel : ViewModel() {
                         terminosAceptados = terminosAceptados
                     )
 
-                    firestore.collection("usuarios").document(uid)
-                        .set(usuario)
-                        .addOnSuccessListener {
-                            println("✅ Usuario guardado en Firestore")
-                            _estadoRegistro.value = Result.success(true)
+                    firestore.collection("usuarios").document(uid).get()
+                        .addOnSuccessListener { document ->
+                            if (!document.exists()) {
+                                firestore.collection("usuarios").document(uid)
+                                    .set(usuario)
+                                    .addOnSuccessListener {
+                                        println("✅ Usuario nuevo guardado en Firestore")
+                                        _estadoRegistro.value = Result.success(true)
+                                    }
+                                    .addOnFailureListener { e ->
+                                        println("❌ Error Firestore al guardar: ${e.message}")
+                                        _estadoRegistro.value = Result.failure(e)
+                                    }
+                            } else {
+                                println("⚠️ Usuario ya existía en Firestore")
+                                _estadoRegistro.value = Result.success(true)
+                            }
                         }
                         .addOnFailureListener { e ->
-                            println("❌ Error Firestore: ${e.message}")
+                            println("❌ Error al comprobar existencia: ${e.message}")
                             _estadoRegistro.value = Result.failure(e)
                         }
-
                 }
                 .addOnFailureListener { e ->
                     println("❌ Error Auth: ${e.message}")
