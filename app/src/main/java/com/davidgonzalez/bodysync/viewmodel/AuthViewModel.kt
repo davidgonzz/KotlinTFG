@@ -9,7 +9,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class AuthViewModel : ViewModel() {
 
@@ -39,7 +41,7 @@ class AuthViewModel : ViewModel() {
                     val usuario = Usuario(
                         nombreCompleto = nombre,
                         correo = correo,
-                        fechaRegistro = Date().toInstant().toString(),
+                        fechaRegistro = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                         terminosAceptados = terminosAceptados
                     )
 
@@ -112,7 +114,7 @@ class AuthViewModel : ViewModel() {
                             val usuario = Usuario(
                                 nombreCompleto = result.user?.displayName ?: "",
                                 correo = result.user?.email ?: "",
-                                fechaRegistro = Date().toInstant().toString(),
+                                fechaRegistro = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                                 terminosAceptados = true,
                                 proveedor = "google"
                             )

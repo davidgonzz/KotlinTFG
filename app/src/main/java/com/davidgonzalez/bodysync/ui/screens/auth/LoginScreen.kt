@@ -249,42 +249,84 @@ fun LoginScreen(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Restablecer contraseña") },
+            title = null, // Eliminamos el título por defecto
             text = {
-                Column {
-                    Text("Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.")
-                    Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Título personalizado
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Recuperación de Contraseña",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "✕",
+                            modifier = Modifier
+                                .clickable { showResetDialog = false },
+                            fontSize = 20.sp,
+                            color = Color.Gray
+                        )
+                    }
+
+                    Text(
+                        text = "Ingresa tu Email para el tramite de recuperación de contraseña",
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
                     OutlinedTextField(
                         value = emailParaReset,
                         onValueChange = { emailParaReset = it },
-                        label = { Text("Email") },
+                        label = { Text("Correo electrónico") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        shape = MaterialTheme.shapes.medium
                     )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.enviarCorreoRecuperacion(
-                        email = emailParaReset,
-                        onSuccess = {
-                            Toast.makeText(context, "Email de recuperación enviado", Toast.LENGTH_LONG).show()
-                            showResetDialog = false
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            viewModel.enviarCorreoRecuperacion(
+                                email = emailParaReset,
+                                onSuccess = {
+                                    Toast.makeText(context, "Email de recuperación enviado", Toast.LENGTH_LONG).show()
+                                    showResetDialog = false
+                                },
+                                onError = {
+                                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                                    showResetDialog = false
+                                }
+                            )
                         },
-                        onError = {
-                            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                            showResetDialog = false
-                        }
-                    )
-                }) {
-                    Text("Enviar")
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = MaterialTheme.shapes.extraLarge,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2C5704), // Color verde de tu app
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Enviar")
+                    }
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
+            confirmButton = {},
+            dismissButton = {},
+            shape = MaterialTheme.shapes.large,
+            containerColor = Color.White
         )
     }
 }
