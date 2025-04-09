@@ -116,7 +116,6 @@ fun LoginScreen(
                 fontSize = 12.sp,
                 color = primaryColor,
                 modifier = Modifier.clickable { }
-
             )
         }
 
