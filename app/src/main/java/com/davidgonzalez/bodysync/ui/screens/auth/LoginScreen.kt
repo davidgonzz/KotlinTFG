@@ -83,7 +83,7 @@ fun LoginScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(72.dp),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
@@ -100,7 +100,7 @@ fun LoginScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(72.dp),
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)

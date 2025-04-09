@@ -77,7 +77,7 @@ fun RegistrationScreen(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(64.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -91,7 +91,7 @@ fun RegistrationScreen(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(64.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -106,7 +106,7 @@ fun RegistrationScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(64.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +121,7 @@ fun RegistrationScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(64.dp)
         )
 
         if (contrasena != confirmarContrasena) {
@@ -144,7 +144,21 @@ fun RegistrationScreen(
                 onCheckedChange = { aceptarTerminos = it },
                 colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2C5704))
             )
-            Text("Acepto los Términos y Condiciones")
+            Row {
+                Text(
+                    text = "Acepto los ",
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "Términos y Condiciones",
+                    fontSize = 12.sp,
+                    color = Color(0xFF2C5704),
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {
+                        // Aquí puedes abrir un diálogo o web con los términos
+                    }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
