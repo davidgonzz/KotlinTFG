@@ -12,12 +12,10 @@ import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
 
 @Composable
 fun AppNavigation() {
-    val navController = rememberNavController()
+    val navController: NavHostController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = "splash"
-    ) {
+    NavHost(navController = navController, startDestination = "splash") {
+
         composable("splash") {
             SplashScreen(navController)
         }
@@ -49,7 +47,13 @@ fun AppNavigation() {
         }
 
         composable("choose") {
-            ChooseScreenUI()
+            ChooseScreenUI(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo("choose") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

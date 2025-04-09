@@ -12,14 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davidgonzalez.bodysync.R
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ChooseScreenUI(
     onElegirNutricion: () -> Unit = {},
-    onElegirGimnasio: () -> Unit = {}
+    onElegirGimnasio: () -> Unit = {},
+    onLogout: () -> Unit = {} // por si luego quieres redirigir a login
 ) {
     Column(
         modifier = Modifier
@@ -86,5 +89,19 @@ fun ChooseScreenUI(
                 Text(text = "Gimnasio", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
         }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // Botón Logout tipo link
+        Text(
+            text = "Cerrar sesión",
+            color = Color(0xFF2C5704),
+            fontSize = 14.sp,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.clickable {
+                FirebaseAuth.getInstance().signOut()
+                onLogout()
+            }
+        )
     }
 }
