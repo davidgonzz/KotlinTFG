@@ -334,6 +334,7 @@ fun LoginScreen(
             dismissButton = {},
             shape = MaterialTheme.shapes.large,
             containerColor = Color.White
+
         )
     }
 }
