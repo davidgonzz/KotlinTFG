@@ -35,7 +35,6 @@ fun PersonalDataScreen(
     val primaryColor = colorResource(id = R.color.progress_line)
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
-    val opcionesObjetivo = listOf("Adelgazar", "Engordar", "Mantenerse")
 
     var altura by remember { mutableStateOf("") }
     var peso by remember { mutableStateOf("") }
@@ -49,8 +48,12 @@ fun PersonalDataScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Cuéntanos sobre ti", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Cuéntanos sobre ti",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = colorResource(id = R.color.progress_line) // ✅ tu verde habitual
+        )
         Text("Usaremos estos datos para adaptar tus planes a ti.", fontSize = 14.sp)
 
         Spacer(modifier = Modifier.height(32.dp))

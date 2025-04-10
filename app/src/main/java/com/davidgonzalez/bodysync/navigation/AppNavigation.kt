@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
+import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.DashBoardNutritionScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
 import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
 import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
@@ -46,9 +47,14 @@ fun AppNavigation() {
                 }
             )
         }
-
         composable("choose") {
             ChooseScreenUI(
+                onElegirNutricion = {
+                    navController.navigate("dashboard_nutricion")
+                },
+                onElegirGimnasio = {
+                    navController.navigate("gym") // si luego añades esta
+                },
                 onLogout = {
                     navController.navigate("login") {
                         popUpTo("choose") { inclusive = true }
@@ -63,6 +69,8 @@ fun AppNavigation() {
                 }
             })
         }
-
+        composable("dashboard_nutricion") {
+            DashBoardNutritionScreen()
+        }
     }
 }

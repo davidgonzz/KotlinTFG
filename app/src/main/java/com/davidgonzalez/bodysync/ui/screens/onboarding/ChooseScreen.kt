@@ -3,101 +3,156 @@ package com.davidgonzalez.bodysync.ui.screens.onboarding
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.davidgonzalez.bodysync.R
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChooseScreenUI(
     onElegirNutricion: () -> Unit = {},
     onElegirGimnasio: () -> Unit = {},
-    onLogout: () -> Unit = {} // por si luego quieres redirigir a login
+    onLogout: () -> Unit = {}
 ) {
+    val interactionSourceNutricion = remember { MutableInteractionSource() }
+    val interactionSourceGimnasio = remember { MutableInteractionSource() }
+    val scope = rememberCoroutineScope()
+
+    var colorNutricion by remember { mutableStateOf(Color(0xFFF1F8EE)) }
+    var colorGimnasio by remember { mutableStateOf(Color(0xFFE5EEF6)) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Spacer(modifier = Modifier.height(80.dp))
+
         Text(
             text = "Elige tu camino",
-            fontSize = 28.sp,
+            fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 48.dp)
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF2C5704)
         )
 
-        Box(
+        Spacer(modifier = Modifier.height(48.dp))
+
+        //NUTRICIÓN
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF1F8EE), shape = RoundedCornerShape(24.dp))
-                .padding(vertical = 16.dp, horizontal = 20.dp)
-                .clickable { onElegirNutricion() }
+                .height(90.dp)
+                .clickable(
+                    interactionSource = interactionSourceNutricion,
+                    indication = null
+                ) {
+                    // Cambio de color momentáneo para dar feedback
+                    colorNutricion = Color(0xFFCDE6B8) // tono más fuerte
+                    scope.launch {
+                        delay(150)
+                        colorNutricion = Color(0xFFF1F8EE) // vuelve al original
+                        onElegirNutricion() // navegación
+                    }
+                },
+            color = colorNutricion,
+            shape = RoundedCornerShape(28.dp),
+            shadowElevation = 6.dp
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(56.dp)
                         .background(Color(0xFFD9EDD0), shape = RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.icon_nutricion),
                         contentDescription = "Nutrición",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(text = "Nutrición", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.width(24.dp))
+                Text(
+                    text = "Nutrición",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Box(
+        // GIMNASIO
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFE5EEF6), shape = RoundedCornerShape(24.dp))
-                .padding(vertical = 16.dp, horizontal = 20.dp)
-                .clickable { onElegirGimnasio() }
+                .height(90.dp)
+                .clickable(
+                    interactionSource = interactionSourceGimnasio,
+                    indication = null
+                ) {
+                    colorGimnasio = Color(0xFFBCD7ED)
+                    scope.launch {
+                        delay(150)
+                        colorGimnasio = Color(0xFFE5EEF6)
+                        onElegirGimnasio()
+                    }
+                },
+            color = colorGimnasio,
+            shape = RoundedCornerShape(28.dp),
+            shadowElevation = 6.dp
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(56.dp)
                         .background(Color(0xFFBCD7ED), shape = RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.icon_gym),
                         contentDescription = "Gimnasio",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(text = "Gimnasio", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.width(24.dp))
+                Text(text = "Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Medium)
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(60.dp))
 
-        // Botón Logout tipo link
         Text(
             text = "Cerrar sesión",
             color = Color(0xFF2C5704),
             fontSize = 14.sp,
-            textDecoration = TextDecoration.Underline,
+            textAlign = TextAlign.Center,
             modifier = Modifier.clickable {
                 FirebaseAuth.getInstance().signOut()
                 onLogout()
