@@ -1,7 +1,8 @@
 package com.davidgonzalez.bodysync.ui.model
 
 data class Usuario(
-    val nombreCompleto: String = "",
+    val nombre: String = "",
+    val apellidos: String = "",
     val correo: String = "",
     val fechaRegistro: String = "",
     val peso: String = "",

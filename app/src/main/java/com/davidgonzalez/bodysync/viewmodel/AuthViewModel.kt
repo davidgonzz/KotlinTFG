@@ -29,6 +29,7 @@ class AuthViewModel : ViewModel() {
     // Registro de usuario
     fun registrarUsuario(
         nombre: String,
+        apellido: String,
         correo: String,
         contrasena: String,
         terminosAceptados: Boolean,
@@ -40,7 +41,8 @@ class AuthViewModel : ViewModel() {
                     val uid = result.user?.uid ?: return@addOnSuccessListener
 
                     val usuario = Usuario(
-                        nombreCompleto = nombre,
+                        nombre = nombre,
+                        apellidos = apellido,
                         correo = correo,
                         fechaRegistro = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                         terminosAceptados = terminosAceptados
@@ -116,7 +118,7 @@ class AuthViewModel : ViewModel() {
                     .addOnSuccessListener { document ->
                         if (!document.exists()) {
                             val usuario = Usuario(
-                                nombreCompleto = result.user?.displayName ?: "",
+                                nombre = result.user?.displayName ?: "",
                                 correo = result.user?.email ?: "",
                                 fechaRegistro = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                                 terminosAceptados = true,

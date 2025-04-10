@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.stateIn
 
 class NutritionViewModel : ViewModel() {
 
-    // Estados para la comida nueva
     private val _tipoSeleccionado = MutableStateFlow("Desayuno")
     val tipoSeleccionado: StateFlow<String> = _tipoSeleccionado
 
@@ -27,14 +27,23 @@ class NutritionViewModel : ViewModel() {
 
     private val _calorias = MutableStateFlow("")
     val calorias: StateFlow<String> = _calorias
-    private val _comidas = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
-    val comidas: StateFlow<List<Pair<String, Int>>> = _comidas
+
+    private val _comidas = MutableStateFlow<List<Triple<String, Int, String>>>(emptyList())
+    val comidas: StateFlow<List<Triple<String, Int, String>>> = _comidas
 
     val caloriasConsumidas: StateFlow<Int> = _comidas.map { lista ->
         lista.sumOf { it.second }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
-    // Actualizar campos
+    val resumenPorTipo = MutableStateFlow(
+        mutableMapOf(
+            "Desayuno" to 0,
+            "Comida" to 0,
+            "Cena" to 0,
+            "Snack" to 0
+        )
+    )
+
     fun actualizarNombreComida(valor: String) {
         _nombreComida.value = valor
     }
@@ -47,25 +56,25 @@ class NutritionViewModel : ViewModel() {
         _tipoSeleccionado.value = valor
     }
 
-    fun añadirComida(onSuccess: () -> Unit = {}) {
-        val nombre = _nombreComida.value
-        val kcal = _calorias.value.toIntOrNull() ?: 0
-        val tipo = _tipoSeleccionado.value
+    fun añadirComida(onSuccess: () -> Unit) {
+        val tipo = tipoSeleccionado.value
+        val kcal = calorias.value.toIntOrNull() ?: 0
+        val nombre = nombreComida.value
 
         if (nombre.isNotBlank() && kcal > 0) {
-            _comidas.value = _comidas.value + (tipo to kcal)
-            limpiarCampos()
+            _comidas.value = _comidas.value + Triple(nombre, kcal, tipo)
+            _nombreComida.value = ""
+            _calorias.value = ""
+
+            resumenPorTipo.value = resumenPorTipo.value.toMutableMap().apply {
+                this[tipo] = (this[tipo] ?: 0) + kcal
+            }
+
             onSuccess()
         }
     }
 
-    private fun limpiarCampos() {
-        _nombreComida.value = ""
-        _calorias.value = ""
-        _tipoSeleccionado.value = "Desayuno"
-    }
-
-    // Dropdown tipo comida
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun DropdownMenuTipo() {
         var expanded by remember { mutableStateOf(false) }
@@ -84,7 +93,11 @@ class NutritionViewModel : ViewModel() {
                         contentDescription = "Expandir",
                         modifier = Modifier.clickable { expanded = !expanded }
                     )
-                }
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF2C5704),
+                    cursorColor = Color(0xFF2C5704)
+                )
             )
 
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {

@@ -102,5 +102,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
     // Si usas Compose
     implementation("androidx.activity:activity-compose:1.7.2")
+    //Search Camera
+    implementation ("com.google.mlkit:barcode-scanning:17.0.2")
+    implementation ("androidx.camera:camera-camera2:1.1.0")
+    implementation ("androidx.camera:camera-lifecycle:1.1.0")
+    implementation ("androidx.camera:camera-view:1.0.0-alpha31")
+
 }
 

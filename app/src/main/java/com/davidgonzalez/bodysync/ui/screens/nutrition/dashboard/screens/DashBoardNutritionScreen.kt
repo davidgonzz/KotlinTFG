@@ -7,11 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.davidgonzalez.bodysync.R
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.BottomNavigationBar
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.CaloriasProgressCircle
 import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
@@ -24,6 +26,8 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
     val comidas by viewModel.comidas.collectAsState()
     val nombre by viewModel.nombreComida.collectAsState()
     val calorias by viewModel.calorias.collectAsState()
+    val resumenPorTipo by viewModel.resumenPorTipo.collectAsState()
+    val tipoSeleccionado by viewModel.tipoSeleccionado.collectAsState()
 
     Scaffold(
         bottomBar = {
@@ -69,19 +73,40 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                comidas.forEach { (nombre, kcal) ->
+            // Mostrar resumen por tipo y alimentos
+            listOf("Desayuno", "Comida", "Cena", "Snack").forEach { tipo ->
+                val kcalTotales = resumenPorTipo[tipo] ?: 0
+                Text(
+                    text = tipo,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "$kcalTotales kcal", fontSize = 16.sp)
+                }
+
+                comidas.filter { it.third == tipo }.forEach {
+                    val nombreComida = it.first
+                    val kcal = it.second
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(start = 16.dp, top = 2.dp, bottom = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = nombre, fontWeight = FontWeight.SemiBold)
-                        Text(text = "$kcal kcal")
+                        Text(text = "- $nombreComida", fontSize = 14.sp)
+                        Text(text = "$kcal kcal", fontSize = 14.sp)
                     }
-                    Divider(color = Color(0xFFDAE2DB))
                 }
+
+                Divider(color = Color(0xFFDAE2DB))
             }
         }
 
@@ -107,7 +132,21 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
                 title = { Text("Añadir comida", fontWeight = FontWeight.Bold) },
                 text = {
                     Column {
-                        Text("Tipo de comida", fontWeight = FontWeight.SemiBold)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Tipo de comida", fontWeight = FontWeight.SemiBold)
+                            IconButton(onClick = { /* abrir escáner más adelante */ }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.icon_qrcode),
+                                    contentDescription = "Escanear",
+                                    tint = Color(0xFF2C5704)
+                                )
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(4.dp))
                         viewModel.DropdownMenuTipo()
 

@@ -12,6 +12,7 @@ class AuthRepository {
 
     fun registrarUsuario(
         nombre: String,
+        apellido: String,
         correo: String,
         contrasena: String,
         terminosAceptados: Boolean,
@@ -23,7 +24,8 @@ class AuthRepository {
                 val uid = result.user?.uid ?: return@addOnSuccessListener
 
                 val usuario = Usuario(
-                    nombreCompleto = nombre,
+                    nombre = nombre,
+                    apellidos = apellido,
                     correo = correo,
                     fechaRegistro = Date().toInstant().toString(),
                     terminosAceptados = terminosAceptados
