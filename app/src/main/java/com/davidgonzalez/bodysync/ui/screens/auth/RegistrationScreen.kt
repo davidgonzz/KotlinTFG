@@ -29,6 +29,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
     onRegistroExitoso: () -> Unit,
@@ -45,6 +46,7 @@ fun RegistrationScreen(
     var aceptarTerminos by remember { mutableStateOf(false) }
     var errorTexto by remember { mutableStateOf<String?>(null) }
 
+    // Launcher de Google
     val googleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
@@ -70,6 +72,8 @@ fun RegistrationScreen(
         }
     }
 
+
+    // Reaccionamos al resultado del registro
     LaunchedEffect(estadoRegistro) {
         estadoRegistro.exceptionOrNull()?.let {
             errorTexto = it.message
@@ -95,6 +99,7 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text("Crea tu cuenta", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -103,9 +108,11 @@ fun RegistrationScreen(
             label = { Text("Nombre completo") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             modifier = Modifier.fillMaxWidth().height(64.dp),
-            singleLine = true
+            singleLine = true,
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+            cursorColor = Color(0xFF2C5704)
+            )
         )
-
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -113,9 +120,13 @@ fun RegistrationScreen(
             onValueChange = { correo = it },
             label = { Text("Correo electrónico") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth().height(64.dp),
-            singleLine = true
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true,
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+            cursorColor = Color(0xFF2C5704)
+
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -125,10 +136,13 @@ fun RegistrationScreen(
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth().height(64.dp),
-            singleLine = true
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+                cursorColor = Color(0xFF2C5704)
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -138,14 +152,17 @@ fun RegistrationScreen(
             onValueChange = { confirmarContrasena = it },
             label = { Text("Confirmar contraseña") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth().height(64.dp),
-            singleLine = true
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+                cursorColor = Color(0xFF2C5704)
+            )
         )
 
         if (contrasena != confirmarContrasena) {
-            Text("Las contraseñas no coinciden", color = Color.Red, fontSize = 12.sp)
+            Text("Las contraseñas no coinciden", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -157,13 +174,13 @@ fun RegistrationScreen(
                 colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2C5704))
             )
             Row {
-                Text("Acepto los ", fontSize = 12.sp)
+                Text(text = "Acepto los ", fontSize = 12.sp)
                 Text(
                     text = "Términos y Condiciones",
                     fontSize = 12.sp,
                     color = Color(0xFF2C5704),
                     textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable { /* abrir términos */ }
                 )
             }
         }
@@ -180,7 +197,13 @@ fun RegistrationScreen(
                     errorTexto = "Debes aceptar los Términos."
                 } else {
                     errorTexto = null
-                    viewModel.registrarUsuario(nombre, correo, contrasena, aceptarTerminos)
+                    viewModel.registrarUsuario(
+                        nombre,
+                        correo,
+                        contrasena,
+                        aceptarTerminos,
+                        onSuccess = { onRegistroExitoso() }
+                    )
                 }
             },
             modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -192,7 +215,10 @@ fun RegistrationScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Divider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color.LightGray)
             Text("  o  ", color = Color.Gray, fontSize = 14.sp)
             Divider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color.LightGray)
@@ -208,7 +234,6 @@ fun RegistrationScreen(
                     .build()
                 val googleClient = GoogleSignIn.getClient(context, gso)
                 val intent = googleClient.signInIntent
-                intent.putExtra("lang", "es")
                 googleLauncher.launch(intent)
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),

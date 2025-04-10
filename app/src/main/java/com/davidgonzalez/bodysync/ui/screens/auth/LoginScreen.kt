@@ -33,6 +33,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.firebase.auth.GoogleAuthProvider
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginExitoso: () -> Unit,
@@ -113,7 +114,10 @@ fun LoginScreen(
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
             modifier = Modifier.fillMaxWidth().height(72.dp),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+                cursorColor = Color(0xFF2C5704)
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -126,7 +130,10 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth().height(72.dp),
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(0xFF2C5704),
+                cursorColor = Color(0xFF2C5704)
+            )
         )
 
         Spacer(modifier = Modifier.height(4.dp))

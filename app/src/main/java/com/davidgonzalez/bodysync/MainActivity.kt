@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.davidgonzalez.bodysync.navigation.AppNavigation
-import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
+import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
 import com.davidgonzalez.bodysync.ui.theme.BodySyncTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BodySyncTheme {
-                AppNavigation()
+                PersonalDataScreen(onContinuar = {})
             }
         }
     }

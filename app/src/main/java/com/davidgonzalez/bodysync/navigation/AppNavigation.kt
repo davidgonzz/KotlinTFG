@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
+import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
 import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
 
 @Composable
@@ -55,5 +56,13 @@ fun AppNavigation() {
                 }
             )
         }
+        composable("datos_fisicos") {
+            PersonalDataScreen(onContinuar = {
+                navController.navigate("choose") {
+                    popUpTo("registration") { inclusive = true }
+                }
+            })
+        }
+
     }
 }

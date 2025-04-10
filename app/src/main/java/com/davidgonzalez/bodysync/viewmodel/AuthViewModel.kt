@@ -31,7 +31,8 @@ class AuthViewModel : ViewModel() {
         nombre: String,
         correo: String,
         contrasena: String,
-        terminosAceptados: Boolean
+        terminosAceptados: Boolean,
+        onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             auth.createUserWithEmailAndPassword(correo, contrasena)
@@ -53,6 +54,7 @@ class AuthViewModel : ViewModel() {
                                     .addOnSuccessListener {
                                         println("✅ Usuario nuevo guardado en Firestore")
                                         _estadoRegistro.value = Result.success(true)
+                                        onSuccess()
                                     }
                                     .addOnFailureListener { e ->
                                         println("❌ Error Firestore al guardar: ${e.message}")
@@ -61,6 +63,7 @@ class AuthViewModel : ViewModel() {
                             } else {
                                 println("⚠️ Usuario ya existía en Firestore")
                                 _estadoRegistro.value = Result.success(true)
+                                onSuccess()
                             }
                         }
                         .addOnFailureListener { e ->
@@ -98,7 +101,8 @@ class AuthViewModel : ViewModel() {
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onError(e.message ?: "Error desconocido") }
     }
-    //Login con Google
+
+    // Login con Google
     fun loginConGoogle(
         credential: AuthCredential,
         mantenerSesion: Boolean,
@@ -126,5 +130,32 @@ class AuthViewModel : ViewModel() {
                     .addOnFailureListener { onError("Firestore error: ${it.message}") }
             }
             .addOnFailureListener { e -> onError(e.message ?: "Error desconocido") }
+    }
+
+    // Guardar datos físicos
+    fun guardarDatosFisicos(
+        altura: String,
+        peso: String,
+        genero: String,
+        objetivo: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val uid = auth.currentUser?.uid
+        if (uid != null) {
+            val datos = mapOf(
+                "altura" to altura,
+                "peso" to peso,
+                "genero" to genero,
+                "objetivo" to objetivo
+            )
+
+            firestore.collection("usuarios").document(uid)
+                .update(datos)
+                .addOnSuccessListener { onSuccess() }
+                .addOnFailureListener { e -> onError(e.message ?: "Error desconocido") }
+        } else {
+            onError("Usuario no logueado")
+        }
     }
 }
