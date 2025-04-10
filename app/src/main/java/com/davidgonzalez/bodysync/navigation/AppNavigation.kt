@@ -37,7 +37,7 @@ fun AppNavigation() {
         composable("registro") {
             RegistrationScreen(
                 onRegistroExitoso = {
-                    navController.navigate("choose") {
+                    navController.navigate("datos_fisicos") {
                         popUpTo("registro") { inclusive = true }
                     }
                 },

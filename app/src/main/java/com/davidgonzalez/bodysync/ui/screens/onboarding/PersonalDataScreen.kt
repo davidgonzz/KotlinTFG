@@ -1,9 +1,13 @@
 package com.davidgonzalez.bodysync.ui.screens.onboarding
 
 import android.widget.Toast
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -30,7 +34,7 @@ fun PersonalDataScreen(
 ) {
     val primaryColor = colorResource(id = R.color.progress_line)
     val context = LocalContext.current
-    var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
     val opcionesObjetivo = listOf("Adelgazar", "Engordar", "Mantenerse")
 
     var altura by remember { mutableStateOf("") }
@@ -114,43 +118,92 @@ fun PersonalDataScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-        ) {
-            OutlinedTextField(
-                value = objetivo,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Objetivo") },
-                leadingIcon = { Icon(Icons.Default.Star, contentDescription = null) },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor()
-                    .height(64.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF2C5704),
-                    cursorColor = Color(0xFF2C5704)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF2C5704),
+                    shape = RoundedCornerShape(12.dp)
                 )
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxSize()
             ) {
-                opcionesObjetivo.forEach { opcion ->
-                    DropdownMenuItem(
-                        text = { Text(opcion) },
-                        onClick = {
-                            objetivo = opcion
-                            expanded = false
-                        }
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = if (objetivo.isNotBlank()) objetivo else "Objetivo",
+                    color = if (objetivo.isNotBlank()) Color.Black else Color.Gray,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(
+                    onClick = { showDialog = true },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Seleccionar objetivo",
+                        tint = Color.Gray
                     )
                 }
             }
+        }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("Aceptar", color = Color(0xFF2C5704))
+                    }
+                },
+                title = {
+                    Text(
+                        "Selecciona tu objetivo",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                containerColor = Color(0xFFE9F5E5), // verde claro
+                text = {
+                    Column {
+                        val opcionesObjetivo = listOf("Adelgazar", "Engordar", "Mantenerse")
+                        opcionesObjetivo.forEach { opcion ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .clickable {
+                                        objetivo = opcion
+                                    }
+                            ) {
+                                Checkbox(
+                                    checked = objetivo == opcion,
+                                    onCheckedChange = { seleccionado ->
+                                        if (seleccionado) objetivo = opcion
+                                    },
+                                    colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2C5704))
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(opcion, fontSize = 16.sp)
+                            }
+                        }
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
