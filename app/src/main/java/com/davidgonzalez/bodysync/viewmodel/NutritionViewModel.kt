@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class NutritionViewModel : ViewModel() {
 
@@ -43,6 +45,12 @@ class NutritionViewModel : ViewModel() {
             "Snack" to 0
         )
     )
+    //LLamamos a valores de firebase para que se pueda almacenar los datos
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _nombreUsuario = MutableStateFlow("")
+    val nombreUsuario: StateFlow<String> = _nombreUsuario
 
     fun actualizarNombreComida(valor: String) {
         _nombreComida.value = valor
@@ -73,7 +81,6 @@ class NutritionViewModel : ViewModel() {
             onSuccess()
         }
     }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun DropdownMenuTipo() {
@@ -112,5 +119,20 @@ class NutritionViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    fun obtenerNombreUsuario() {
+        val uid = auth.currentUser?.uid ?: return
+
+        firestore.collection("usuarios").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val nombre = document.getString("nombre") ?: "Usuario"
+                    _nombreUsuario.value = nombre
+                }
+            }
+            .addOnFailureListener {
+                _nombreUsuario.value = "Usuario"
+            }
     }
 }

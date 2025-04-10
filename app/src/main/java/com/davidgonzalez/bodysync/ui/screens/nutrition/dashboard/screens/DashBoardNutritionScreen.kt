@@ -28,6 +28,11 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
     val calorias by viewModel.calorias.collectAsState()
     val resumenPorTipo by viewModel.resumenPorTipo.collectAsState()
     val tipoSeleccionado by viewModel.tipoSeleccionado.collectAsState()
+    val nombreUsuario by viewModel.nombreUsuario.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.obtenerNombreUsuario()
+    }
 
     Scaffold(
         bottomBar = {
@@ -45,7 +50,7 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "David",
+                text = nombreUsuario,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Start)
