@@ -13,13 +13,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.davidgonzalez.bodysync.R
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.BottomNavigationBar
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.CaloriasProgressCircle
 import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
 
 @Composable
-fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
+fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navController: NavHostController) {
     var mostrarDialogo by remember { mutableStateOf(false) }
 
     val caloriasConsumidas by viewModel.caloriasConsumidas.collectAsState()
@@ -27,7 +28,6 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
     val nombre by viewModel.nombreComida.collectAsState()
     val calorias by viewModel.calorias.collectAsState()
     val resumenPorTipo by viewModel.resumenPorTipo.collectAsState()
-    val tipoSeleccionado by viewModel.tipoSeleccionado.collectAsState()
     val nombreUsuario by viewModel.nombreUsuario.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -74,6 +74,16 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A5F0B))
             ) {
                 Text("Añadir comida")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Botón para iniciar el escaneo
+            Button(
+                onClick = { navController.navigate("barcode_scanner") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Escanear producto")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -143,13 +153,16 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel()) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text("Tipo de comida", fontWeight = FontWeight.SemiBold)
-                            IconButton(onClick = { /* abrir escáner más adelante */ }) {
+                            IconButton(onClick = {
+                                navController.navigate("barcode_scanner")
+                            }) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.icon_qrcode),
                                     contentDescription = "Escanear",
                                     tint = Color(0xFF2C5704)
                                 )
                             }
+
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))

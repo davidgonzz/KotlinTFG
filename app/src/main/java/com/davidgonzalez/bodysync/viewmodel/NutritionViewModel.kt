@@ -120,7 +120,6 @@ class NutritionViewModel : ViewModel() {
             }
         }
     }
-
     fun obtenerNombreUsuario() {
         val uid = auth.currentUser?.uid ?: return
 
@@ -135,4 +134,11 @@ class NutritionViewModel : ViewModel() {
                 _nombreUsuario.value = "Usuario"
             }
     }
+    fun añadirComidaConCodigo(codigo: String) {
+        // Procesa el código escaneado y añade la comida correspondiente
+        val nombreComida = "Producto escaneado: $codigo"
+        val calorias = 100 // Aquí puedes agregar una lógica para obtener las calorías
+        _comidas.value = _comidas.value + Triple(nombreComida, calorias, tipoSeleccionado.value)
+    }
+
 }

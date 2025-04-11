@@ -1,20 +1,24 @@
 package com.davidgonzalez.bodysync.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
+import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.BarcodeScannerScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.DashBoardNutritionScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
 import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
 import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
+import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
 
 @Composable
 fun AppNavigation() {
     val navController: NavHostController = rememberNavController()
+    val viewModel: NutritionViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash") {
 
@@ -70,7 +74,19 @@ fun AppNavigation() {
             })
         }
         composable("dashboard_nutricion") {
-            DashBoardNutritionScreen()
+            DashBoardNutritionScreen(navController= navController)
         }
+        composable("barcode_scanner") {
+            BarcodeScannerScreen(
+                onCodeScanned = { code ->
+                    // Usar el código escaneado, por ejemplo:
+                    viewModel.añadirComidaConCodigo(code)
+                    navController.popBackStack()  // Volver a la pantalla anterior
+                },
+                onCancel = { navController.popBackStack() }  // Cancelar y volver
+            )
+        }
+
+
     }
 }
