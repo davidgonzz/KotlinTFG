@@ -235,6 +235,5 @@ class NutritionViewModel : ViewModel() {
         val nombreComida = "Producto escaneado: $codigo"
         val calorias = 100
         _comidas.value = _comidas.value + Triple(nombreComida, calorias, tipoSeleccionado.value)
-
     }
 }
