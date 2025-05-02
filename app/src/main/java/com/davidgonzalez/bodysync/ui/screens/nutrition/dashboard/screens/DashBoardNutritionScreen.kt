@@ -2,6 +2,8 @@ package com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,10 +21,12 @@ import com.davidgonzalez.bodysync.R
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.BottomNavigationBar
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.functions.CaloriasProgressCircle
 import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navController: NavHostController) {
     var mostrarDialogo by remember { mutableStateOf(false) }
+    var expandedMenu by remember { mutableStateOf(false) }
 
     val caloriasConsumidas by viewModel.caloriasConsumidas.collectAsState()
     val comidas by viewModel.comidas.collectAsState()
@@ -29,9 +34,12 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
     val calorias by viewModel.calorias.collectAsState()
     val resumenPorTipo by viewModel.resumenPorTipo.collectAsState()
     val nombreUsuario by viewModel.nombreUsuario.collectAsState()
+    val caloriasObjetivo by viewModel.caloriasObjetivo.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.obtenerNombreUsuario()
+        viewModel.obtenerComidasDeHoy()
+        viewModel.calcularCaloriasDesdeDatosUsuario()
     }
 
     Scaffold(
@@ -48,19 +56,51 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = nombreUsuario,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Text(
-                text = nombreUsuario,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start)
-            )
+                Box {
+                    IconButton(onClick = { expandedMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Menú usuario",
+                            tint = Color(0xFF2C5704)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = expandedMenu,
+                        onDismissRequest = { expandedMenu = false },
+                        modifier = Modifier.align(Alignment.TopEnd),
+                        offset = DpOffset(x = 0.dp, y = 0.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Cerrar sesión") },
+                            onClick = {
+                                expandedMenu = false
+                                FirebaseAuth.getInstance().signOut()
+                                navController.navigate("login") {
+                                    popUpTo("dashboard") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             CaloriasProgressCircle(
                 caloriasConsumidas = caloriasConsumidas,
-                caloriasTotales = 2000
+                caloriasTotales = caloriasObjetivo
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -78,17 +118,6 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón para iniciar el escaneo
-            Button(
-                onClick = { navController.navigate("barcode_scanner") },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Escanear producto")
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Mostrar resumen por tipo y alimentos
             listOf("Desayuno", "Comida", "Cena", "Snack").forEach { tipo ->
                 val kcalTotales = resumenPorTipo[tipo] ?: 0
                 Text(
@@ -162,7 +191,6 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
                                     tint = Color(0xFF2C5704)
                                 )
                             }
-
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))

@@ -15,7 +15,11 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun CaloriasProgressCircle(caloriasConsumidas: Int, caloriasTotales: Int) {
-    val porcentaje = caloriasConsumidas.toFloat() / caloriasTotales.toFloat()
+    val porcentaje = if (caloriasTotales > 0) {
+        caloriasConsumidas.toFloat() / caloriasTotales.toFloat()
+    } else {
+        0f
+    }
 
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(240.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -50,3 +54,4 @@ fun CaloriasProgressCircle(caloriasConsumidas: Int, caloriasTotales: Int) {
         }
     }
 }
+

@@ -147,16 +147,5 @@ fun ChooseScreenUI(
         }
 
         Spacer(modifier = Modifier.height(60.dp))
-
-        Text(
-            text = "Cerrar sesión",
-            color = Color(0xFF2C5704),
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.clickable {
-                FirebaseAuth.getInstance().signOut()
-                onLogout()
-            }
-        )
     }
 }

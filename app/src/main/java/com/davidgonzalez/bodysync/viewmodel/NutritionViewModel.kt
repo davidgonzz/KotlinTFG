@@ -11,13 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import java.time.LocalDate
+import kotlin.math.roundToInt
+
 
 class NutritionViewModel : ViewModel() {
 
@@ -45,12 +48,60 @@ class NutritionViewModel : ViewModel() {
             "Snack" to 0
         )
     )
-    //LLamamos a valores de firebase para que se pueda almacenar los datos
+
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
     private val _nombreUsuario = MutableStateFlow("")
     val nombreUsuario: StateFlow<String> = _nombreUsuario
+
+    private val _caloriasObjetivo = MutableStateFlow(2000)
+    val caloriasObjetivo: StateFlow<Int> = _caloriasObjetivo
+
+    fun calcularCaloriasDesdeDatosUsuario() {
+        val uid = auth.currentUser?.uid ?: return
+
+        firestore.collection("usuarios").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val pesoStr = document.getString("peso") ?: "70"
+                    val alturaStr = document.getString("altura") ?: "170"
+                    val edadStr = document.getString("edad") ?: "25"
+                    val sexo = document.getString("genero") ?: "masculino"
+                    val objetivo = document.getString("objetivo") ?: "mantener"
+                    val actividad = document.getString("actividad") ?: "moderada"
+
+                    val peso = pesoStr.toDoubleOrNull() ?: 70.0
+                    val altura = alturaStr.toDoubleOrNull() ?: 170.0
+                    val edad = edadStr.toIntOrNull() ?: 25
+
+                    val tmb = when (sexo.lowercase()) {
+                        "masculino" -> 88.36 + (13.4 * peso) + (4.8 * altura) - (5.7 * edad)
+                        "femenino"  -> 447.6 + (9.2 * peso) + (3.1 * altura) - (4.3 * edad)
+                        else -> 88.36 + (13.4 * peso) + (4.8 * altura) - (5.7 * edad)
+                    }
+
+                    val factorActividad = when (actividad.lowercase()) {
+                        "sedentaria" -> 1.2
+                        "ligera"     -> 1.375
+                        "moderada"   -> 1.55
+                        "intensa"    -> 1.725
+                        else         -> 1.55
+                    }
+
+                    var calorias = tmb * factorActividad
+
+                    calorias += when (objetivo.lowercase()) {
+                        "definir"  -> -400
+                        "volumen"  -> 400
+                        "engordar" -> 400
+                        else       -> 0
+                    }
+
+                    _caloriasObjetivo.value = ((calorias / 100).roundToInt() * 100)
+                }
+            }
+    }
 
     fun actualizarNombreComida(valor: String) {
         _nombreComida.value = valor
@@ -70,17 +121,61 @@ class NutritionViewModel : ViewModel() {
         val nombre = nombreComida.value
 
         if (nombre.isNotBlank() && kcal > 0) {
-            _comidas.value = _comidas.value + Triple(nombre, kcal, tipo)
-            _nombreComida.value = ""
-            _calorias.value = ""
+            val uid = auth.currentUser?.uid ?: return
+            val fecha = LocalDate.now().toString()
 
-            resumenPorTipo.value = resumenPorTipo.value.toMutableMap().apply {
-                this[tipo] = (this[tipo] ?: 0) + kcal
-            }
+            val comidaMap = hashMapOf(
+                "nombre" to nombre,
+                "calorias" to kcal,
+                "tipo" to tipo,
+                "fecha" to fecha
+            )
 
-            onSuccess()
+            firestore.collection("usuarios")
+                .document(uid)
+                .collection("comidas")
+                .add(comidaMap)
+                .addOnSuccessListener {
+                    _nombreComida.value = ""
+                    _calorias.value = ""
+                    obtenerComidasDeHoy()
+                    onSuccess()
+                }
         }
     }
+
+    fun obtenerComidasDeHoy() {
+        val uid = auth.currentUser?.uid ?: return
+        val fechaHoy = LocalDate.now().toString()
+
+        firestore.collection("usuarios")
+            .document(uid)
+            .collection("comidas")
+            .whereEqualTo("fecha", fechaHoy)
+            .get()
+            .addOnSuccessListener { result ->
+                val lista = mutableListOf<Triple<String, Int, String>>()
+                val resumen = mutableMapOf(
+                    "Desayuno" to 0,
+                    "Comida" to 0,
+                    "Cena" to 0,
+                    "Snack" to 0
+                )
+
+                for (doc in result) {
+                    val nombre = doc.getString("nombre") ?: continue
+                    val kcal = doc.getLong("calorias")?.toInt() ?: continue
+                    val tipo = doc.getString("tipo") ?: "Desayuno"
+
+                    lista.add(Triple(nombre, kcal, tipo))
+                    resumen[tipo] = resumen[tipo]!! + kcal
+                }
+
+                _comidas.value = lista
+                resumenPorTipo.value = resumen
+            }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun DropdownMenuTipo() {
@@ -120,6 +215,7 @@ class NutritionViewModel : ViewModel() {
             }
         }
     }
+
     fun obtenerNombreUsuario() {
         val uid = auth.currentUser?.uid ?: return
 
@@ -134,11 +230,10 @@ class NutritionViewModel : ViewModel() {
                 _nombreUsuario.value = "Usuario"
             }
     }
+
     fun añadirComidaConCodigo(codigo: String) {
-        // Procesa el código escaneado y añade la comida correspondiente
         val nombreComida = "Producto escaneado: $codigo"
-        val calorias = 100 // Aquí puedes agregar una lógica para obtener las calorías
+        val calorias = 100
         _comidas.value = _comidas.value + Triple(nombreComida, calorias, tipoSeleccionado.value)
     }
-
 }
