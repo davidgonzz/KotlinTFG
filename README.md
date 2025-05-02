@@ -58,5 +58,5 @@ Este proyecto está licenciado bajo la **MIT License**.
 
 ---
 
-Desarrollado con 💪 y ☕ por [David].
+Desarrollado con 💪 y ☕ por David.
 
