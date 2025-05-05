@@ -79,13 +79,16 @@ fun AppNavigation() {
         composable("barcode_scanner") {
             BarcodeScannerScreen(
                 onCodeScanned = { code ->
-                    // Usar el código escaneado, por ejemplo:
-                    viewModel.añadirComidaConCodigo(code)
-                    navController.popBackStack()  // Volver a la pantalla anterior
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("codigo_barras", code)
+
+                    navController.popBackStack()
                 },
-                onCancel = { navController.popBackStack() }  // Cancelar y volver
+                onCancel = { navController.popBackStack() }
             )
         }
+
 
 
     }

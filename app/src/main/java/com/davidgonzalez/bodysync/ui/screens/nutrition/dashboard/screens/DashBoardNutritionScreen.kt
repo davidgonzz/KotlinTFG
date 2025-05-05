@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,9 @@ import com.google.firebase.auth.FirebaseAuth
 fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navController: NavHostController) {
     var mostrarDialogo by remember { mutableStateOf(false) }
     var expandedMenu by remember { mutableStateOf(false) }
+    var mostrarDialogoGramos by remember { mutableStateOf(false) }
+    var gramosInput by remember { mutableStateOf("") }
+    var codigoEscaneado by remember { mutableStateOf<String?>(null) }
 
     val caloriasConsumidas by viewModel.caloriasConsumidas.collectAsState()
     val comidas by viewModel.comidas.collectAsState()
@@ -36,10 +40,22 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
     val nombreUsuario by viewModel.nombreUsuario.collectAsState()
     val caloriasObjetivo by viewModel.caloriasObjetivo.collectAsState()
 
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val codigoLiveData = savedStateHandle?.getLiveData<String>("codigo_barras")?.observeAsState()
+
     LaunchedEffect(Unit) {
         viewModel.obtenerNombreUsuario()
         viewModel.obtenerComidasDeHoy()
         viewModel.calcularCaloriasDesdeDatosUsuario()
+    }
+
+    // Detecta si ha llegado un código
+    LaunchedEffect(codigoLiveData?.value) {
+        codigoLiveData?.value?.let { codigo ->
+            codigoEscaneado = codigo
+            mostrarDialogoGramos = true
+            savedStateHandle.remove<String>("codigo_barras")
+        }
     }
 
     Scaffold(
@@ -56,6 +72,7 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -215,6 +232,51 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
+                },
+                containerColor = Color.White,
+                shape = MaterialTheme.shapes.large
+            )
+        }
+
+        // Diálogo para pedir gramos
+        if (mostrarDialogoGramos && codigoEscaneado != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    mostrarDialogoGramos = false
+                    codigoEscaneado = null
+                    gramosInput = ""
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val gramos = gramosInput.toIntOrNull() ?: 100
+                        viewModel.buscarAlimentoPorCodigo(codigoEscaneado!!, gramos) { nombre, kcal ->
+                            viewModel.actualizarNombreComida(nombre)
+                            viewModel.actualizarCalorias(kcal.toString())
+                        }
+                        mostrarDialogoGramos = false
+                        codigoEscaneado = null
+                        gramosInput = ""
+                    }) {
+                        Text("Aceptar", color = Color(0xFF2C5704))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarDialogoGramos = false
+                        codigoEscaneado = null
+                        gramosInput = ""
+                    }) {
+                        Text("Cancelar", color = Color.Gray)
+                    }
+                },
+                title = { Text("¿Cuántos gramos?", fontWeight = FontWeight.Bold) },
+                text = {
+                    OutlinedTextField(
+                        value = gramosInput,
+                        onValueChange = { gramosInput = it },
+                        label = { Text("Gramos") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
                 },
                 containerColor = Color.White,
                 shape = MaterialTheme.shapes.large
