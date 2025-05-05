@@ -158,11 +158,6 @@ class NutritionViewModel : ViewModel() {
             }
     }
 
-    fun añadirComidaConCodigo(codigo: String) {
-        val nombreComida = "Producto escaneado: $codigo"
-        val calorias = 100
-        _comidas.value = _comidas.value + Triple(nombreComida, calorias, tipoSeleccionado.value)
-    }
     fun buscarAlimentoPorCodigo(
         codigo: String,
         gramos: Int,
@@ -234,5 +229,6 @@ class NutritionViewModel : ViewModel() {
                 _nombreUsuario.value = "Usuario"
             }
     }
+
 
 }

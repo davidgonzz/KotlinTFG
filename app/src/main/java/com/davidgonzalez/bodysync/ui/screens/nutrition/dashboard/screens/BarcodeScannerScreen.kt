@@ -24,6 +24,8 @@ import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 
+private var hasScanned = false
+
 
 @Composable
 fun BarcodeScannerScreen(
@@ -105,7 +107,6 @@ fun BarcodeScannerScreen(
         }
     }
 }
-
 @SuppressLint("UnsafeOptInUsageError")
 fun processImageProxy(
     scanner: BarcodeScanner,
@@ -116,19 +117,28 @@ fun processImageProxy(
     if (mediaImage != null) {
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-        scanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                barcodes.firstOrNull()?.rawValue?.let { code ->
-                    onCodeScanned(code)
+        // Usamos una variable estática para que solo se escanee una vez
+        if (!hasScanned) {
+            scanner.process(image)
+                .addOnSuccessListener { barcodes ->
+                    barcodes.firstOrNull()?.rawValue?.let { code ->
+                        if (!hasScanned) {
+                            hasScanned = true // Evita que se escanee múltiples veces
+                            onCodeScanned(code)
+                        }
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e("BarcodeScanner", "Error en escaneo: ${e.message}")
-            }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
+                .addOnFailureListener { e ->
+                    Log.e("BarcodeScanner", "Error en escaneo: ${e.message}")
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                }
+        } else {
+            imageProxy.close()
+        }
     } else {
         imageProxy.close()
     }
 }
+

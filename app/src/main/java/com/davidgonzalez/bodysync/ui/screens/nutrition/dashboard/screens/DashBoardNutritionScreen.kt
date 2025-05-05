@@ -1,7 +1,9 @@
 package com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -135,152 +137,165 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            listOf("Desayuno", "Comida", "Cena", "Snack").forEach { tipo ->
-                val kcalTotales = resumenPorTipo[tipo] ?: 0
-                Text(
-                    text = tipo,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(text = "$kcalTotales kcal", fontSize = 16.sp)
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                listOf("Desayuno", "Comida", "Cena", "Snack").forEach { tipo ->
+                    val kcalTotales = resumenPorTipo[tipo] ?: 0
 
-                comidas.filter { it.third == tipo }.forEach {
-                    val nombreComida = it.first
-                    val kcal = it.second
+                    Text(
+                        text = tipo,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp, top = 2.dp, bottom = 2.dp),
+                            .padding(vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "- $nombreComida", fontSize = 14.sp)
-                        Text(text = "$kcal kcal", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(text = "$kcalTotales kcal", fontSize = 16.sp)
                     }
-                }
 
-                Divider(color = Color(0xFFDAE2DB))
-            }
-        }
+                    comidas.filter { it.third == tipo }.forEach {
+                        val nombreComida = it.first
+                        val kcal = it.second
 
-        if (mostrarDialogo) {
-            AlertDialog(
-                onDismissRequest = { mostrarDialogo = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.añadirComida {
-                                mostrarDialogo = false
-                            }
-                        }
-                    ) {
-                        Text("Guardar", color = Color(0xFF2C5704))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { mostrarDialogo = false }) {
-                        Text("Cancelar", color = Color.Gray)
-                    }
-                },
-                title = { Text("Añadir comida", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, top = 2.dp, bottom = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Tipo de comida", fontWeight = FontWeight.SemiBold)
-                            IconButton(onClick = {
-                                navController.navigate("barcode_scanner")
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.icon_qrcode),
-                                    contentDescription = "Escanear",
-                                    tint = Color(0xFF2C5704)
-                                )
-                            }
+                            Text(text = "- $nombreComida", fontSize = 14.sp)
+                            Text(text = "$kcal kcal", fontSize = 14.sp)
                         }
+                    }
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                        viewModel.DropdownMenuTipo()
+                    Divider(color = Color(0xFFDAE2DB))
+                }
+            }
 
-                        Spacer(modifier = Modifier.height(12.dp))
 
+            if (mostrarDialogo) {
+                AlertDialog(
+                    onDismissRequest = { mostrarDialogo = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.añadirComida {
+                                    mostrarDialogo = false
+                                }
+                            }
+                        ) {
+                            Text("Guardar", color = Color(0xFF2C5704))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { mostrarDialogo = false }) {
+                            Text("Cancelar", color = Color.Gray)
+                        }
+                    },
+                    title = { Text("Añadir comida", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Tipo de comida", fontWeight = FontWeight.SemiBold)
+                                IconButton(onClick = {
+                                    navController.navigate("barcode_scanner")
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.icon_qrcode),
+                                        contentDescription = "Escanear",
+                                        tint = Color(0xFF2C5704)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            viewModel.DropdownMenuTipo()
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedTextField(
+                                value = nombre,
+                                onValueChange = { viewModel.actualizarNombreComida(it) },
+                                label = { Text("Nombre del alimento") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedTextField(
+                                value = calorias,
+                                onValueChange = { viewModel.actualizarCalorias(it) },
+                                label = { Text("Calorías") },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+                    },
+                    containerColor = Color.White,
+                    shape = MaterialTheme.shapes.large
+                )
+            }
+
+            // Diálogo para pedir gramos
+            if (mostrarDialogoGramos && codigoEscaneado != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        mostrarDialogoGramos = false
+                        codigoEscaneado = null
+                        gramosInput = ""
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            val gramos = gramosInput.toIntOrNull() ?: 100
+                            viewModel.buscarAlimentoPorCodigo(
+                                codigoEscaneado!!,
+                                gramos
+                            ) { nombre, kcal ->
+                                viewModel.actualizarNombreComida(nombre)
+                                viewModel.actualizarCalorias(kcal.toString())
+                            }
+                            mostrarDialogoGramos = false
+                            codigoEscaneado = null
+                            gramosInput = ""
+                        }) {
+                            Text("Aceptar", color = Color(0xFF2C5704))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            mostrarDialogoGramos = false
+                            codigoEscaneado = null
+                            gramosInput = ""
+                        }) {
+                            Text("Cancelar", color = Color.Gray)
+                        }
+                    },
+                    title = { Text("¿Cuántos gramos?", fontWeight = FontWeight.Bold) },
+                    text = {
                         OutlinedTextField(
-                            value = nombre,
-                            onValueChange = { viewModel.actualizarNombreComida(it) },
-                            label = { Text("Nombre del alimento") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = calorias,
-                            onValueChange = { viewModel.actualizarCalorias(it) },
-                            label = { Text("Calorías") },
-                            modifier = Modifier.fillMaxWidth(),
+                            value = gramosInput,
+                            onValueChange = { gramosInput = it },
+                            label = { Text("Gramos") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
-                    }
-                },
-                containerColor = Color.White,
-                shape = MaterialTheme.shapes.large
-            )
-        }
-
-        // Diálogo para pedir gramos
-        if (mostrarDialogoGramos && codigoEscaneado != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    mostrarDialogoGramos = false
-                    codigoEscaneado = null
-                    gramosInput = ""
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        val gramos = gramosInput.toIntOrNull() ?: 100
-                        viewModel.buscarAlimentoPorCodigo(codigoEscaneado!!, gramos) { nombre, kcal ->
-                            viewModel.actualizarNombreComida(nombre)
-                            viewModel.actualizarCalorias(kcal.toString())
-                        }
-                        mostrarDialogoGramos = false
-                        codigoEscaneado = null
-                        gramosInput = ""
-                    }) {
-                        Text("Aceptar", color = Color(0xFF2C5704))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        mostrarDialogoGramos = false
-                        codigoEscaneado = null
-                        gramosInput = ""
-                    }) {
-                        Text("Cancelar", color = Color.Gray)
-                    }
-                },
-                title = { Text("¿Cuántos gramos?", fontWeight = FontWeight.Bold) },
-                text = {
-                    OutlinedTextField(
-                        value = gramosInput,
-                        onValueChange = { gramosInput = it },
-                        label = { Text("Gramos") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                },
-                containerColor = Color.White,
-                shape = MaterialTheme.shapes.large
-            )
+                    },
+                    containerColor = Color.White,
+                    shape = MaterialTheme.shapes.large
+                )
+            }
         }
     }
 }
