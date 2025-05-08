@@ -1,7 +1,6 @@
 package com.davidgonzalez.bodysync.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,15 +9,14 @@ import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.BarcodeScannerScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.DashBoardNutritionScreen
+import com.davidgonzalez.bodysync.ui.screens.nutrition.progress.screens.ProgressNutritionScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
 import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
 import com.davidgonzalez.bodysync.ui.screens.splash.SplashScreen
-import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
 
 @Composable
 fun AppNavigation() {
     val navController: NavHostController = rememberNavController()
-    val viewModel: NutritionViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash") {
 
@@ -51,13 +49,14 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable("choose") {
             ChooseScreenUI(
                 onElegirNutricion = {
                     navController.navigate("dashboard_nutricion")
                 },
                 onElegirGimnasio = {
-                    navController.navigate("gym") // si luego añades esta
+                    navController.navigate("gym") // futura implementación
                 },
                 onLogout = {
                     navController.navigate("login") {
@@ -66,6 +65,7 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable("datos_fisicos") {
             PersonalDataScreen(onContinuar = {
                 navController.navigate("choose") {
@@ -73,9 +73,11 @@ fun AppNavigation() {
                 }
             })
         }
+
         composable("dashboard_nutricion") {
-            DashBoardNutritionScreen(navController= navController)
+            DashBoardNutritionScreen(navController = navController)
         }
+
         composable("barcode_scanner") {
             BarcodeScannerScreen(
                 onCodeScanned = { code ->
@@ -89,7 +91,8 @@ fun AppNavigation() {
             )
         }
 
-
-
+        composable("progreso_nutricion") {
+            ProgressNutritionScreen(navController = navController)
+        }
     }
 }

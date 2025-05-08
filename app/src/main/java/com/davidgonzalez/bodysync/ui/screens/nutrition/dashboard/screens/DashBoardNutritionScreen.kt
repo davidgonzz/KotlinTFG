@@ -62,9 +62,10 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(selectedItem = "inicio")
+            BottomNavigationBar(selectedItem = "inicio", navController = navController)
         },
-        containerColor = Color.White
+
+                containerColor = Color.White
     ) { paddingValues ->
         Column(
             modifier = Modifier

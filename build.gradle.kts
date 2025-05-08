@@ -7,6 +7,6 @@ plugins {
 // build.gradle (Project)
 buildscript {
     dependencies {
-        classpath("com.google.gms:google-services:4.4.0") // última versión estable
+        classpath("com.google.gms:google-services:4.4.0")
     }
 }

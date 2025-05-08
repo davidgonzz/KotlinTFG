@@ -47,6 +47,13 @@ class NutritionViewModel : ViewModel() {
     private val _nombreUsuario = MutableStateFlow("")
     val nombreUsuario: StateFlow<String> = _nombreUsuario
 
+    private val _progresoSemanal = MutableStateFlow<List<Int>>(emptyList())
+    val progresoSemanal: StateFlow<List<Int>> = _progresoSemanal
+
+    private val _progresoMensual = MutableStateFlow<List<Int>>(emptyList())
+    val progresoMensual: StateFlow<List<Int>> = _progresoMensual
+
+
     private val _caloriasObjetivo = MutableStateFlow(2000)
     val caloriasObjetivo: StateFlow<Int> = _caloriasObjetivo
 
@@ -229,6 +236,4 @@ class NutritionViewModel : ViewModel() {
                 _nombreUsuario.value = "Usuario"
             }
     }
-
-
 }
