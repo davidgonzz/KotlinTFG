@@ -50,12 +50,12 @@ class NutritionViewModel : ViewModel() {
     private val _progresoSemanal = MutableStateFlow<List<Int>>(emptyList())
     val progresoSemanal: StateFlow<List<Int>> = _progresoSemanal
 
-    private val _progresoMensual = MutableStateFlow<List<Int>>(emptyList())
-    val progresoMensual: StateFlow<List<Int>> = _progresoMensual
-
-
     private val _caloriasObjetivo = MutableStateFlow(2000)
     val caloriasObjetivo: StateFlow<Int> = _caloriasObjetivo
+
+    private val _caloriasPorDia = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val caloriasPorDia: StateFlow<Map<String, Int>> = _caloriasPorDia
+
 
     fun calcularCaloriasDesdeDatosUsuario() {
         val uid = auth.currentUser?.uid ?: return
@@ -234,6 +234,52 @@ class NutritionViewModel : ViewModel() {
             }
             .addOnFailureListener {
                 _nombreUsuario.value = "Usuario"
+            }
+    }
+    fun obtenerProgresoSemanal() {
+        val uid = auth.currentUser?.uid ?: return
+        val hoy = LocalDate.now()
+        val fechasSemana = (0..6).map { hoy.minusDays(it.toLong()).toString() }.reversed()
+
+        firestore.collection("usuarios")
+            .document(uid)
+            .collection("comidas")
+            .whereIn("fecha", fechasSemana)
+            .get()
+            .addOnSuccessListener { result ->
+                val mapa = mutableMapOf<String, Int>().apply {
+                    fechasSemana.forEach { put(it, 0) }
+                }
+
+                for (doc in result) {
+                    val fecha = doc.getString("fecha") ?: continue
+                    val kcal = doc.getLong("calorias")?.toInt() ?: continue
+                    mapa[fecha] = mapa.getOrDefault(fecha, 0) + kcal
+                }
+
+                _progresoSemanal.value = fechasSemana.map { mapa[it] ?: 0 }
+            }
+    }
+
+    fun obtenerCaloriasDelMes() {
+        val uid = auth.currentUser?.uid ?: return
+        val hoy = LocalDate.now()
+        val diasMes = hoy.lengthOfMonth()
+        val fechasMes = (1..diasMes).map { hoy.withDayOfMonth(it).toString() }
+
+        firestore.collection("usuarios")
+            .document(uid)
+            .collection("comidas")
+            .whereIn("fecha", fechasMes)
+            .get()
+            .addOnSuccessListener { result ->
+                val mapa = mutableMapOf<String, Int>()
+                for (doc in result) {
+                    val fecha = doc.getString("fecha") ?: continue
+                    val kcal = doc.getLong("calorias")?.toInt() ?: 0
+                    mapa[fecha] = (mapa[fecha] ?: 0) + kcal
+                }
+                _caloriasPorDia.value = mapa
             }
     }
 }
