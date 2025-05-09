@@ -33,7 +33,6 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
     var mostrarDialogoGramos by remember { mutableStateOf(false) }
     var gramosInput by remember { mutableStateOf("") }
     var codigoEscaneado by remember { mutableStateOf<String?>(null) }
-
     val caloriasConsumidas by viewModel.caloriasConsumidas.collectAsState()
     val comidas by viewModel.comidas.collectAsState()
     val nombre by viewModel.nombreComida.collectAsState()
@@ -41,9 +40,10 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
     val resumenPorTipo by viewModel.resumenPorTipo.collectAsState()
     val nombreUsuario by viewModel.nombreUsuario.collectAsState()
     val caloriasObjetivo by viewModel.caloriasObjetivo.collectAsState()
-
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val codigoLiveData = savedStateHandle?.getLiveData<String>("codigo_barras")?.observeAsState()
+    var mostrarMenuModo by remember { mutableStateOf(false) }
+    var modoActual by remember { mutableStateOf("nutricion") }
 
     LaunchedEffect(Unit) {
         viewModel.obtenerNombreUsuario()
@@ -59,10 +59,9 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
             savedStateHandle.remove<String>("codigo_barras")
         }
     }
-
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(selectedItem = "inicio", navController = navController)
+            BottomNavigationBar(selectedItem = "inicio", navController = navController, onModoClick = { mostrarMenuModo = true})
         },
 
                 containerColor = Color.White
@@ -300,3 +299,4 @@ fun DashBoardNutritionScreen(viewModel: NutritionViewModel = viewModel(), navCon
         }
     }
 }
+

@@ -57,11 +57,6 @@ fun AppNavigation() {
                 },
                 onElegirGimnasio = {
                     navController.navigate("gym") // futura implementación
-                },
-                onLogout = {
-                    navController.navigate("login") {
-                        popUpTo("choose") { inclusive = true }
-                    }
                 }
             )
         }

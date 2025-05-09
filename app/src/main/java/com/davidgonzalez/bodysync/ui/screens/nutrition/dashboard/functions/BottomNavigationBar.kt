@@ -16,9 +16,11 @@ import com.davidgonzalez.bodysync.R
 @Composable
 fun BottomNavigationBar(
     selectedItem: String,
-    navController: NavHostController
+    navController: NavHostController,
+    onModoClick: () -> Unit = {}
 ) {
     NavigationBar(containerColor = Color.White, tonalElevation = 6.dp) {
+        // Botón Inicio
         NavigationBarItem(
             icon = {
                 Icon(
@@ -44,6 +46,7 @@ fun BottomNavigationBar(
             )
         )
 
+        // Botón Progreso
         NavigationBarItem(
             icon = {
                 Icon(
@@ -69,6 +72,7 @@ fun BottomNavigationBar(
             )
         )
 
+        // Botón Modo → activa el menú flotante
         NavigationBarItem(
             icon = {
                 Icon(
@@ -80,11 +84,9 @@ fun BottomNavigationBar(
             label = { Text("Modo", fontSize = 12.sp) },
             selected = selectedItem == "modo",
             onClick = {
-                if (selectedItem != "modo") {
-                    navController.navigate("modo") {
-                        popUpTo("dashboard_nutricion") { inclusive = false }
-                        launchSingleTop = true
-                    }
+                navController.navigate("choose") {
+                    popUpTo(0) // Limpia el backstack si lo deseas
+                    launchSingleTop = true
                 }
             },
             colors = NavigationBarItemDefaults.colors(

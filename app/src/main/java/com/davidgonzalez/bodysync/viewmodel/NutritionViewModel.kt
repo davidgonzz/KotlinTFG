@@ -264,22 +264,33 @@ class NutritionViewModel : ViewModel() {
     fun obtenerCaloriasDelMes() {
         val uid = auth.currentUser?.uid ?: return
         val hoy = LocalDate.now()
-        val diasMes = hoy.lengthOfMonth()
-        val fechasMes = (1..diasMes).map { hoy.withDayOfMonth(it).toString() }
+        val mesActual = hoy.monthValue
+        val añoActual = hoy.year
 
         firestore.collection("usuarios")
             .document(uid)
             .collection("comidas")
-            .whereIn("fecha", fechasMes)
             .get()
             .addOnSuccessListener { result ->
                 val mapa = mutableMapOf<String, Int>()
+
                 for (doc in result) {
-                    val fecha = doc.getString("fecha") ?: continue
+                    val fechaStr = doc.getString("fecha") ?: continue
                     val kcal = doc.getLong("calorias")?.toInt() ?: 0
-                    mapa[fecha] = (mapa[fecha] ?: 0) + kcal
+
+                    val fecha = try {
+                        LocalDate.parse(fechaStr)
+                    } catch (e: Exception) {
+                        continue
+                    }
+
+                    if (fecha.monthValue == mesActual && fecha.year == añoActual) {
+                        mapa[fechaStr] = (mapa[fechaStr] ?: 0) + kcal
+                    }
                 }
+
                 _caloriasPorDia.value = mapa
             }
     }
+
 }

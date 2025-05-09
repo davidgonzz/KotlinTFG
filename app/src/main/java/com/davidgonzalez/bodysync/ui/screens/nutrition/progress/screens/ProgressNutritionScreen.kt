@@ -2,7 +2,9 @@ package com.davidgonzalez.bodysync.ui.screens.nutrition.progress.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -22,6 +24,9 @@ import com.davidgonzalez.bodysync.ui.screens.nutrition.progress.functions.BarCha
 import com.davidgonzalez.bodysync.ui.screens.nutrition.progress.functions.MonthlyCalendarComposable
 import com.davidgonzalez.bodysync.viewmodel.NutritionViewModel
 import com.google.firebase.auth.FirebaseAuth
+import java.time.LocalDate
+import java.util.Locale
+import java.time.format.TextStyle
 import kotlin.math.roundToInt
 
 @Composable
@@ -33,31 +38,39 @@ fun ProgressNutritionScreen(
     val caloriasConsumidas by viewModel.caloriasConsumidas.collectAsState()
     val caloriasObjetivo by viewModel.caloriasObjetivo.collectAsState()
     val progresoSemanal by viewModel.progresoSemanal.collectAsState()
-    val caloriasPorDia by viewModel.caloriasPorDia.collectAsState()
     var expandedMenu by remember { mutableStateOf(false) }
-
     var isWeekly by remember { mutableStateOf(true) }
 
+    val scrollState = rememberScrollState()
+
+    // Llama siempre al entrar, así se actualiza el calendario
     LaunchedEffect(Unit) {
         viewModel.obtenerNombreUsuario()
         viewModel.obtenerComidasDeHoy()
         viewModel.obtenerProgresoSemanal()
         viewModel.calcularCaloriasDesdeDatosUsuario()
-    }
-
-    LaunchedEffect(isWeekly) {
-        if (!isWeekly) {
-            viewModel.obtenerCaloriasDelMes()
-        }
+        viewModel.obtenerCaloriasDelMes()
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(selectedItem = "progreso", navController = navController) }
+        bottomBar = {
+            BottomNavigationBar(
+                selectedItem = "progreso",
+                navController = navController,
+                onModoClick = {
+                    navController.navigate("choose") {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -172,32 +185,55 @@ fun ProgressNutritionScreen(
             if (isWeekly) {
                 BarChartComposable(data = progresoSemanal)
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Surface(
-                    tonalElevation = 1.dp,
-                    shape = MaterialTheme.shapes.medium,
-                    color = Color(0xFFF8FBF7),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        val dias = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
-                        val data = progresoSemanal
-                        val diaMax = dias.getOrElse(data.indexOf(data.maxOrNull() ?: 0)) { "-" }
-                        val diaMin = dias.getOrElse(data.indexOf(data.minOrNull() ?: 0)) { "-" }
-
-                        Text("• Día con más calorías: ", fontSize = 14.sp)
-                        Text(text = "  $diaMax", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text("• Día con menos calorías: ", fontSize = 14.sp)
-                        Text(text = "  $diaMin", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    }
+                // Asegúrate que los días coincidan con el orden del gráfico
+                val progresoReordenado = progresoSemanal.takeLast(7) // <-- adapta si hay más de 7 días
+                val today = LocalDate.now()
+                val dias = (6 downTo 0).map {
+                    today.minusDays(it.toLong()).dayOfWeek
+                        .getDisplayName(TextStyle.FULL, Locale("es"))
+                        .replaceFirstChar { it.uppercase() }
                 }
-            } else {
-                MonthlyCalendarComposable(caloriasPorDia = caloriasPorDia)
+
+                val diaMax = dias.getOrElse(progresoReordenado.indexOf(progresoReordenado.maxOrNull() ?: 0)) { "-" }
+                val diaMin = dias.getOrElse(progresoReordenado.indexOf(progresoReordenado.minOrNull() ?: 0)) { "-" }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                ResumenSemanal(diaMax = diaMax, diaMin = diaMin)
             }
+            else {
+                MonthlyCalendarComposable(caloriasPorDia = viewModel.caloriasPorDia.collectAsState().value)
+            }
+
+
+        }
+    }
+}
+
+@Composable
+fun ResumenSemanal(diaMax: String, diaMin: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F5EC)),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("• Día con más calorías:", fontSize = 14.sp)
+            Text(
+                text = diaMax,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider(color = Color(0xFFDAE2DB), thickness = 1.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("• Día con menos calorías:", fontSize = 14.sp)
+            Text(
+                text = diaMin,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
         }
     }
 }

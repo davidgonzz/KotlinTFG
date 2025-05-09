@@ -1,7 +1,9 @@
 package com.davidgonzalez.bodysync.ui.screens.nutrition.progress.functions
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -17,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import java.time.format.TextStyle
 import java.util.*
 
@@ -25,19 +26,22 @@ import java.util.*
 fun MonthlyCalendarComposable(caloriasPorDia: Map<String, Int>) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val hoy = LocalDate.now()
+    var selectedDate by remember { mutableStateOf(hoy) }
 
     val primerDiaMes = currentMonth.atDay(1)
     val diasEnMes = currentMonth.lengthOfMonth()
-    val primerDiaSemana = primerDiaMes.dayOfWeek.value % 7
+    val primerDiaSemana = primerDiaMes.dayOfWeek.value - 1
+
     val totalCeldas = ((primerDiaSemana + diasEnMes + 6) / 7) * 7
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val displayFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
+
     val nombreMes = currentMonth.month
         .getDisplayName(TextStyle.FULL, Locale("es"))
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es")) else it.toString() }
 
     Column {
-        // Encabezado con mes y navegación
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,7 +64,6 @@ fun MonthlyCalendarComposable(caloriasPorDia: Map<String, Int>) {
             }
         }
 
-        // Días de la semana
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -95,41 +98,82 @@ fun MonthlyCalendarComposable(caloriasPorDia: Map<String, Int>) {
                             val fechaStr = fecha.format(formatter)
                             val kcal = caloriasPorDia[fechaStr] ?: 0
                             val esHoy = fecha == hoy
+                            val isSelected = fecha == selectedDate
+
+                            val animatedBg by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> Color(0xFFD0E9D0)
+                                    esHoy -> Color(0xFFB8D8B2)
+                                    else -> Color.Transparent
+                                },
+                                label = "bgColor"
+                            )
+
+                            val animatedBorder by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> Color(0xFF4E8A3E)
+                                    esHoy -> Color(0xFF2C5704)
+                                    else -> Color.Transparent
+                                },
+                                label = "borderColor"
+                            )
+
+                            val animatedTextColor by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> Color(0xFF4E8A3E)
+                                    esHoy -> Color(0xFF2C5704)
+                                    else -> Color.Black
+                                },
+                                label = "textColor"
+                            )
 
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box(
                                     modifier = Modifier
                                         .size(28.dp)
-                                        .background(
-                                            if (esHoy) Color(0xFFB8D8B2) else Color.Transparent,
-                                            shape = CircleShape
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            color = if (esHoy) Color(0xFF2C5704) else Color.Transparent,
-                                            shape = CircleShape
-                                        ),
+                                        .background(animatedBg, shape = CircleShape)
+                                        .border(1.dp, animatedBorder, shape = CircleShape)
+                                        .clickable { selectedDate = fecha },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = diaDelMes.toString(),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = if (esHoy) Color(0xFF2C5704) else Color.Black
+                                        color = animatedTextColor
                                     )
                                 }
-
-                                if (kcal > 0) {
-                                    Text(
-                                        text = "$kcal",
-                                        fontSize = 10.sp,
-                                        color = Color.Gray
-                                    )
-                                }
+                                Spacer(modifier = Modifier.height(12.dp))
                             }
                         }
                     }
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val fechaSeleccionadaStr = selectedDate.format(formatter)
+        val caloriasSeleccionadas = caloriasPorDia[fechaSeleccionadaStr]
+
+        if (selectedDate.isAfter(hoy)) {
+            Text(
+                text = "Datos todavía no disponibles",
+                color = Color.Gray,
+                fontWeight = FontWeight.Medium
+            )
+        } else {
+            if (caloriasSeleccionadas != null) {
+                Text(
+                    text = "Total consumido el ${selectedDate.format(displayFormatter)}: $caloriasSeleccionadas kcal",
+                    fontWeight = FontWeight.Medium
+                )
+            } else {
+                Text(
+                    text = "Sin datos registrados para el ${selectedDate.format(displayFormatter)}",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
