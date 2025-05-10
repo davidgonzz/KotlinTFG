@@ -1,6 +1,5 @@
 package com.davidgonzalez.bodysync.ui.screens.gym.dashboard.screens
 
-import android.os.CountDownTimer
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.davidgonzalez.bodysync.utils.ExerciseState
+import coil.decode.GifDecoder
+import coil.request.ImageRequest
 import com.davidgonzalez.bodysync.utils.ExerciseStateManager
 import com.davidgonzalez.bodysync.viewmodel.GymViewModel
 
@@ -56,7 +56,6 @@ fun DetailExerciseScreen(
             }
 
             var seriesRestantes by remember { mutableStateOf(estadoInicial.seriesRestantes) }
-            var completado by remember { mutableStateOf(estadoInicial.completado) }
             var tiempoRestante by remember { mutableStateOf(ejercicio.descanso) }
             var temporizadorActivo by remember { mutableStateOf(false) }
 
@@ -91,7 +90,10 @@ fun DetailExerciseScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 AsyncImage(
-                    model = ejercicio.gifUrl,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(ejercicio.gifUrl)
+                        .decoderFactory(GifDecoder.Factory())
+                        .build(),
                     contentDescription = ejercicio.nombre,
                     modifier = Modifier
                         .fillMaxWidth()
