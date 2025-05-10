@@ -9,6 +9,8 @@ import com.davidgonzalez.bodysync.ui.screens.auth.LoginScreen
 import com.davidgonzalez.bodysync.ui.screens.auth.RegistrationScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.BarcodeScannerScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.dashboard.screens.DashBoardNutritionScreen
+import com.davidgonzalez.bodysync.ui.screens.gym.dashboard.screens.DashboardGymScreen
+import com.davidgonzalez.bodysync.ui.screens.gym.dashboard.screens.DetailExerciseScreen
 import com.davidgonzalez.bodysync.ui.screens.nutrition.progress.screens.ProgressNutritionScreen
 import com.davidgonzalez.bodysync.ui.screens.onboarding.ChooseScreenUI
 import com.davidgonzalez.bodysync.ui.screens.onboarding.PersonalDataScreen
@@ -89,5 +91,14 @@ fun AppNavigation() {
         composable("progreso_nutricion") {
             ProgressNutritionScreen(navController = navController)
         }
+        composable("gym") {
+            DashboardGymScreen(navController = navController)
+        }
+        composable("detalle_ejercicio/{nombre}") { backStackEntry ->
+            val nombreEjercicio = backStackEntry.arguments?.getString("nombre") ?: ""
+            DetailExerciseScreen(nombre = nombreEjercicio, navController = navController)
+            
+        }
+
     }
 }

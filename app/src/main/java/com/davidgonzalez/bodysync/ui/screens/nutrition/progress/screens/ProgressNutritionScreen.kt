@@ -149,7 +149,7 @@ fun ProgressNutritionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val porcentaje = (caloriasConsumidas.toFloat() / caloriasObjetivo * 100).coerceIn(0f, 100f)
+            val porcentaje = (caloriasConsumidas.toFloat() / caloriasObjetivo * 100)
 
             Box(
                 modifier = Modifier

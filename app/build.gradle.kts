@@ -120,6 +120,8 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.0")
 
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("io.coil-kt:coil-gif:2.5.0")
+
 
 
 
